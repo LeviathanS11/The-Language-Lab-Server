@@ -32,8 +32,12 @@ async function run() {
 
     app.get('/classes',async(req,res)=>{
         console.log(req.query);
+        const query = {};
+        const options = {
+          sort: { students: -1 },
+        };
         const limit=parseInt(req.query.limit)
-        const result=await classCollection.find().limit(limit).toArray();
+        const result=await classCollection.find(query,options).limit(limit).toArray();
         res.send(result)
     })
     app.get('/class',async(req,res)=>{
@@ -50,6 +54,11 @@ async function run() {
     })
     app.get('/instructor',async(req,res)=>{
         const result=await instructorCollection.find().toArray();
+        res.send(result)
+    })
+    app.get('/PInstructor',async(req,res)=>{
+        const limit=parseInt(req.query.limit)
+        const result=await instructorCollection.find().limit(limit).toArray();
         res.send(result)
     })
 
