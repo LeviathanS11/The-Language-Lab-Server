@@ -28,13 +28,28 @@ async function run() {
 
     const classCollection=client.db("LanguageDB").collection("classes");
     const topCollection=client.db("LanguageDB").collection("topSlider");
+    const instructorCollection=client.db("LanguageDB").collection("instructor");
 
     app.get('/classes',async(req,res)=>{
-        const result=await classCollection.find().toArray();
+        console.log(req.query);
+        const limit=parseInt(req.query.limit)
+        const result=await classCollection.find().limit(limit).toArray();
+        res.send(result)
+    })
+    app.get('/class',async(req,res)=>{
+        const query = {};
+        const options = {
+          sort: { students: -1 },
+        };
+        const result=await classCollection.find(query,options).toArray();
         res.send(result)
     })
     app.get('/top',async(req,res)=>{
         const result=await topCollection.find().toArray();
+        res.send(result)
+    })
+    app.get('/instructor',async(req,res)=>{
+        const result=await instructorCollection.find().toArray();
         res.send(result)
     })
 
