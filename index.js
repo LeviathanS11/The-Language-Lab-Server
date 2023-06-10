@@ -1,9 +1,9 @@
-const express=require('express');
-const app=express();
-const cors=require('cors')
+const express = require('express');
+const app = express();
+const cors = require('cors')
 require('dotenv').config()
 
-const port=process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
 app.use(cors())
 app.use(express.json())
@@ -24,42 +24,76 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-     await client.connect();
+    await client.connect();
 
-    const classCollection=client.db("LanguageDB").collection("classes");
-    const topCollection=client.db("LanguageDB").collection("topSlider");
-    const instructorCollection=client.db("LanguageDB").collection("instructor");
+    const classCollection = client.db("LanguageDB").collection("classes");
+    const topCollection = client.db("LanguageDB").collection("topSlider");
+    const instructorCollection = client.db("LanguageDB").collection("instructor");
+    const myClassCollection = client.db("LanguageDB").collection("mySelectdClass")
+    const userCollection = client.db("LanguageDB").collection("users")
 
-    app.get('/classes',async(req,res)=>{
-        console.log(req.query);
-        const query = {};
-        const options = {
-          sort: { students: -1 },
-        };
-        const limit=parseInt(req.query.limit)
-        const result=await classCollection.find(query,options).limit(limit).toArray();
-        res.send(result)
+    //users
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      console.log(user)
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query);
+      console.log(existingUser)
+      if (existingUser) {
+        return res.send({ message: 'user already exist' })
+      }
+      const result = await userCollection.insertOne(user)
+      res.send(result)
     })
-    app.get('/class',async(req,res)=>{
-        const query = {};
-        const options = {
-          sort: { students: -1 },
-        };
-        const result=await classCollection.find(query,options).toArray();
-        res.send(result)
+
+    app.get('/classes', async (req, res) => {
+      // console.log(req.query);
+      const query = {};
+      const options = {
+        sort: { students: -1 },
+      };
+      const limit = parseInt(req.query.limit)
+      const result = await classCollection.find(query, options).limit(limit).toArray();
+      res.send(result)
     })
-    app.get('/top',async(req,res)=>{
-        const result=await topCollection.find().toArray();
-        res.send(result)
+    app.get('/class', async (req, res) => {
+      const query = {};
+      const options = {
+        sort: { students: -1 },
+      };
+      const result = await classCollection.find(query, options).toArray();
+      res.send(result)
     })
-    app.get('/instructor',async(req,res)=>{
-        const result=await instructorCollection.find().toArray();
-        res.send(result)
+    app.get('/top', async (req, res) => {
+      const result = await topCollection.find().toArray();
+      res.send(result)
     })
-    app.get('/PInstructor',async(req,res)=>{
-        const limit=parseInt(req.query.limit)
-        const result=await instructorCollection.find().limit(limit).toArray();
-        res.send(result)
+    app.get('/instructor', async (req, res) => {
+      const result = await instructorCollection.find().toArray();
+      res.send(result)
+    })
+    app.get('/PInstructor', async (req, res) => {
+      const limit = parseInt(req.query.limit)
+      const result = await instructorCollection.find().limit(limit).toArray();
+      res.send(result)
+    })
+
+    //MySelectedClass
+    app.get('/myclass', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([])
+      }
+      const query = { email: email }
+      const result = await myClassCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    app.post('/myclass', async (req, res) => {
+      const item = req.body;
+      console.log(item)
+      const result = await myClassCollection.insertOne(item)
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
@@ -73,10 +107,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/',(req,res)=>{
-    res.send('assignment 12 server is running ...')
+app.get('/', (req, res) => {
+  res.send('assignment 12 server is running ...')
 })
 
-app.listen(port,()=>{
-    console.log(`server is running on port:${port}`)
+app.listen(port, () => {
+  console.log(`server is running on port:${port}`)
 })
