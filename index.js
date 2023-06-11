@@ -96,6 +96,13 @@ async function run() {
       const result = await classCollection.find(query, options).limit(limit).toArray();
       res.send(result)
     })
+
+    app.post('/addClass',async(req,res)=>{
+      const newClass=req.body;
+      const result=await classCollection.insertOne(newClass)
+      res.send(result);
+    })
+
     app.get('/class', async (req, res) => {
       const query = {};
       const options = {
@@ -133,6 +140,13 @@ async function run() {
       const item = req.body;
       console.log(item)
       const result = await myClassCollection.insertOne(item)
+      res.send(result)
+    })
+
+    app.delete('/deleteClass/:id',async(req,res)=>{
+      const id=req.params.id;
+      const query={_id:new ObjectId(id)}
+      const result=await myClassCollection.deleteOne(query)
       res.send(result)
     })
 
